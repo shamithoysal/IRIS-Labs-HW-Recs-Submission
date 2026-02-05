@@ -11,6 +11,8 @@ The singular Multiply-Accumulate Unit. Cascading multiple MACs in a linear fashi
 Supports 
 ### Design Choices
 
-# 5. FIFO 
+# 5. Line Buffer
 
-# 6. Verification 
+# 6. Asynchronous FIFO 
+
+# 7. Verification 

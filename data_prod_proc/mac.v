@@ -1,6 +1,6 @@
 module mac(
     input clk,
-    input reset,
+    input reset_n,
     input en_weight,
     input signed [31:0] in_north,
     input [7:0]  in_west,
@@ -13,7 +13,7 @@ module mac(
     reg signed [7:0] weight;
 
     always @(posedge clk) begin
-        if (reset) begin
+        if (~reset_n) begin
             weight <= 8'sb0;
             out_east <= 8'b0;
             out_south <= 32'sb0;

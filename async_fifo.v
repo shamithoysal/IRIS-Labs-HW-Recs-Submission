@@ -2,16 +2,16 @@ module async_fifo #(
     parameter DWIDTH=8, 
     parameter DEPTH=16
 )(
-    input wire wclk,
-    input wire wrst_n,
-    input wire w_en,
-    input wire [DWIDTH-1:0] wdata,
-    output wire wfull,
-    input wire rclk,
-    input wire rrst_n,
-    input wire r_en,
+    input wclk,
+    input wrst_n,
+    input w_en,
+    input [DWIDTH-1:0] wdata,
+    output wfull,
+    input rclk,
+    input rrst_n,
+    input r_en,
     output reg [DWIDTH-1:0] rdata,
-    output wire rempty
+    output rempty
 );
 
     reg [DWIDTH-1:0] mem [DEPTH-1:0];
