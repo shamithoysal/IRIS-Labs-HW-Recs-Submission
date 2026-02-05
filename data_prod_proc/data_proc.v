@@ -8,6 +8,8 @@ module data_proc (
 
 );
 
+endmodule
+
 /* --------------------------------------------------------------------------
 Purpose of this module : This module should perform certain operations
 based on the mode register and pixel values streamed out by data_prod module.

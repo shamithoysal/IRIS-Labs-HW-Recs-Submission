@@ -14,10 +14,10 @@
     Thus, the value actually passed to the internal logic is 001 instead of retaining the stable 000. Finally, the decoder incorrectly asserts aen[1] for one clock cycle.
 
 
-3. The fundamental problem lies in transferring multiple data bits that are not grey-coded. Each bit may experience metastability independently and resolve at different times or suffer arrival skew. As a result, the destination domain may sample a mix of old and new values, leading to corrupted data.
+3. The fundamental problem lies in transferring multiple data bits that are not gray-coded. Each bit may experience metastability independently and resolve at different times or suffer arrival skew. As a result, the destination domain may sample a mix of old and new values, leading to corrupted data.
 
 
-4. While grey-code seems straightforward, it will not wholly solve the problem alone. Since it is a control signal that is being passed, the values need not consecutively increment or decrement. If the initial control signal is 100 (4) and changes to 110 (6), the grey-code equivalent would be 110 -> 101. The numbers do not differ by a single bit, and hence grey-coding does not serve its purpose.
+4. While gray-code seems straightforward, it will not wholly solve the problem alone. Since it is a control signal that is being passed, the values need not consecutively increment or decrement. If the initial control signal is 100 (4) and changes to 110 (6), the gray-code equivalent would be 110 -> 101. The numbers do not differ by a single bit, and hence gray-coding does not serve its purpose.
 
 Proposed solutions:
 
@@ -29,7 +29,7 @@ Proposed solutions:
 
 2. **Asynchronous FIFO:**
 
-    Use a standard asynchronous FIFO that buffers the incoming data long enough for the destination to read. Only the read and write pointers (grey-coded) have to be synchronized between the domains.
+    Use a standard asynchronous FIFO that buffers the incoming data long enough for the destination to read. Only the read and write pointers (gray-coded) have to be synchronized between the domains.
 
     A fundamental drawback in this approach is the FIFO is limited by its depth. If the input write speed exceeds the read speed for a prolonged period, it may lead to overflow and critical data loss. Therefore, writes should be asserted only if space is available.
 
