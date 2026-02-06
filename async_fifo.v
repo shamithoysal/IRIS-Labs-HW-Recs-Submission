@@ -1,7 +1,7 @@
 module async_fifo #(
     parameter DWIDTH=8, 
     parameter DEPTH=16
-)(
+)( 
     input wclk,
     input wrst_n,
     input w_en,
