@@ -1,4 +1,4 @@
-module data_proc #(
+module data_processor #(
     parameter DATA_WIDTH = 8,
     parameter IMG_WIDTH = 32
 )(
@@ -56,7 +56,7 @@ module data_proc #(
         kernel_reg[2], kernel_reg[1], kernel_reg[0]
     };
 
-    systolic_engine #(.DATA_WIDTH(8), .IMG_WIDTH(IMG_WIDTH)) u_engine (
+    systolic_engine #(.DATA_WIDTH(8), .IMG_WIDTH(IMG_WIDTH)) systolic_engine (
         .clk(clk), .rst_n(rstn),
         .in_valid(in_valid && (mode_reg == 2'b10)),
         .in_data(in_data),

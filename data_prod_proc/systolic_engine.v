@@ -34,7 +34,7 @@ module systolic_engine #(
     reg [31:0] final_sum;
     reg [8:0] valid_pipe;
 
-    line_buffer #(.DATA_WIDTH(8), .IMG_WIDTH(IMG_WIDTH)) u_line_buf (
+    line_buffer #(.DATA_WIDTH(8), .IMG_WIDTH(IMG_WIDTH)) line_buffer (
         .clk(clk), .reset_n(rst_n),
         .valid_in(in_valid), .din(in_data),
         .dout_0(tap0), .dout_1(tap1), .dout_2(tap2)

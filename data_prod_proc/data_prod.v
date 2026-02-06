@@ -14,7 +14,7 @@ module data_producer #(
     reg [$clog2(IMAGE_SIZE):0] pixel_index;
 
     initial begin
-        $readmemh("image.hex", image_mem);
+        $readmemh("image.mem", image_mem);
     end
 
     always @(posedge sensor_clk or negedge rst_n) begin
