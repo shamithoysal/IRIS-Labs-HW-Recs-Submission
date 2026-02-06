@@ -46,6 +46,10 @@ module tb_data_prod_proc;
     reg [7:0] cfg_wdata = 0;
     wire [7:0] cfg_rdata;
 
+    // ---------------------------------------------------
+    // Module Instantiations
+    // ---------------------------------------------------
+
     async_fifo #(.DWIDTH(8), .DEPTH(16)) async_fifo (
         .wclk(sensor_clk), .wrst_n(sensor_resetn),
         .w_en(valid),          
@@ -61,7 +65,6 @@ module tb_data_prod_proc;
     // Flow Control
     assign ready = !fifo_wfull;       
     assign fifo_ren = !fifo_rempty;   
-
 
     data_processor #(.DATA_WIDTH(8), .IMG_WIDTH(32)) data_processor (
         .clk(clk),
@@ -84,8 +87,9 @@ module tb_data_prod_proc;
         .valid(valid)
     );
 
-
-
+    // ---------------------------------------------------
+    // Configuration Tasks (Posedge Implementation)
+    // ---------------------------------------------------
     task write_reg(input [4:0] addr, input [7:0] data);
         begin
             @(posedge clk);
@@ -97,29 +101,84 @@ module tb_data_prod_proc;
         end
     endtask
 
+    task read_reg(input [4:0] addr);
+        begin
+            @(posedge clk);
+            cfg_write_en = 0;
+            cfg_addr = addr;
+            @(posedge clk);
+            #1; // Tiny delay for simulator print stability
+            $display("[TB] Read Addr %h: Data = %h", addr, cfg_rdata);
+        end
+    endtask
+
+    // ---------------------------------------------------
+    // Main Simulation Block (All Phases)
+    // ---------------------------------------------------
     initial begin
         wait(resetn);
         repeat(10) @(posedge clk);
-        $display("--- Reset Released ---");
+        $display("\n[TB] --- Reset Released ---");
 
-        // Set Mode to Convolution
+        // ==========================================
+        // PHASE 1: CONVOLUTION (Mode 10)
+        // ==========================================
+        $display("\n[TB] === PHASE 1: Testing Convolution (Mode 10) ===");
         write_reg(5'h00, 8'b0000_0010); 
 
-        // Load Edge Detection Kernel
-        write_reg(5'h04, 8'd0);
-        write_reg(5'h05, -8'd1);
-        write_reg(5'h06, 8'd0);
-        write_reg(5'h07, -8'd1);
-        write_reg(5'h08, 8'd4);
-        write_reg(5'h09, -8'd1);
-        write_reg(5'h0A, 8'd0);
-        write_reg(5'h0B, -8'd1);
-        write_reg(5'h0C, 8'd0);
-        $display("--- Weights Loaded ---");
+        // Load Edge Kernel
+        write_reg(5'h04, 8'd0);   write_reg(5'h05, -8'd1);  write_reg(5'h06, 8'd0);
+        write_reg(5'h07, -8'd1);  write_reg(5'h08, 8'd4);   write_reg(5'h09, -8'd1);
+        write_reg(5'h0A, 8'd0);   write_reg(5'h0B, -8'd1);  write_reg(5'h0C, 8'd0);
+        
+        $display("[TB] --- Weights Loaded ---");
+        read_reg(5'h08); // Verify Center
 
-        #10000;
-        $display("--- Simulation Done ---");
+        // Run long enough to see the box pass through
+        #50000; 
+
+        // ==========================================
+        // PHASE 2: BYPASS (Mode 00)
+        // ==========================================
+        $display("\n[TB] === PHASE 2: Testing Bypass (Mode 00) ===");
+        write_reg(5'h00, 8'b0000_0000); // Mode 0
+
+        // Run for 20us (enough for a few lines)
+        #20000;
+
+        // ==========================================
+        // PHASE 3: INVERT (Mode 01)
+        // ==========================================
+        $display("\n[TB] === PHASE 3: Testing Invert (Mode 01) ===");
+        write_reg(5'h00, 8'b0000_0001); // Mode 1
+
+        // Run for 20us
+        #20000;
+
+        $display("\n[TB] --- All Tests Complete ---");
         $finish;
     end
 
+    // ---------------------------------------------------
+    // LOGGER: Writes Output to File & Console
+    // ---------------------------------------------------
+    integer f;
+    
+    initial begin
+        f = $fopen("simulation_log.txt", "w"); // Open file
+        $fwrite(f, "Time_ns, Valid, Input_Pixel_Hex, Output_Pixel_Hex, Output_Pixel_Dec\n"); // Header
+    end
+
+    always @(posedge clk) begin
+        // Only log when we have a valid output
+        if (proc_out_valid) begin
+            // Write to Console
+            $display("Time: %0t | In: %h | Out: %h (%0d)", 
+                     $time, fifo_rdata, proc_out_pixel, proc_out_pixel);
+            
+            // Write to File
+            $fwrite(f, "%0t, 1, %h, %h, %0d\n", 
+                    $time, fifo_rdata, proc_out_pixel, proc_out_pixel);
+        end
+    end
 endmodule

@@ -45,6 +45,15 @@ module data_processor #(
     always @(*) begin
         case (reg_addr)
             5'h00: reg_rdata = {6'b0, mode_reg};
+            5'h04: reg_rdata = kernel_reg[0];
+            5'h05: reg_rdata = kernel_reg[1];
+            5'h06: reg_rdata = kernel_reg[2];
+            5'h07: reg_rdata = kernel_reg[3];
+            5'h08: reg_rdata = kernel_reg[4]; 
+            5'h09: reg_rdata = kernel_reg[5];
+            5'h0A: reg_rdata = kernel_reg[6];
+            5'h0B: reg_rdata = kernel_reg[7];
+            5'h0C: reg_rdata = kernel_reg[8];
             5'h10: reg_rdata = 8'hAA;
             default: reg_rdata = 8'h00;
         endcase
