@@ -38,3 +38,23 @@ Proposed solutions:
     This method establishes a closed-loop communication channel. The source asserts a Request signal along with the data. The destination synchronizes this request, captures the data, and sends *back* an Acknowledge signal. The source must wait for this Acknowledge to be synchronized back into its own domain before it can complete the transaction. This ensures incredible robustness and works well even with variations in delays, clock frequencies etc.
 
     In a tradeoff for robustness, we give up **latency**. This method takes roughly twice as long as method 1 (multi cycle path) as it requires the acknowledge signal to also travel back through the synchronizers.
+
+![alt text](image.png)
+![UART Memory Map](image-1.png)
+
+### Accelerator Memory Map (Base: `0x0300_0000`)
+
+| Register Name | Offset | Address | Access | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| **MODE** | `+0x00` | `0x0300_0000` | RW | 0=Bypass, 1=Invert, 2=Conv |
+| **K00** | `+0x04` | `0x0300_0004` | RW | Kernel Weight (0,0) |
+| **K01** | `+0x08` | `0x0300_0008` | RW | Kernel Weight (0,1) |
+| **K02** | `+0x0C` | `0x0300_000C` | RW | Kernel Weight (0,2) |
+| **K10** | `+0x10` | `0x0300_0010` | RW | Kernel Weight (1,0) |
+| **K11** | `+0x14` | `0x0300_0014` | RW | Kernel Weight (1,1) |
+| **K12** | `+0x18` | `0x0300_0018` | RW | Kernel Weight (1,2) |
+| **K20** | `+0x1C` | `0x0300_001C` | RW | Kernel Weight (2,0) |
+| **K21** | `+0x20` | `0x0300_0020` | RW | Kernel Weight (2,1) |
+| **K22** | `+0x24` | `0x0300_0024` | RW | Kernel Weight (2,2) |
+| **STATUS** | `+0x28` | **`0x0300_0028`** | **RO** | **Bit 0**: 1 = Data Available (FIFO Not Empty). |
+| **RESULT** | `+0x2C` | **`0x0300_002C`** | **RO** | Reading this **POPS** 1 pixel from the Output FIFO. |

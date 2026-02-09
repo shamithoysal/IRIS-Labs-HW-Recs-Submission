@@ -61,7 +61,8 @@ module rvsoc_wrapper (
 		.ENABLE_MUL(0),
 		.ENABLE_DIV(0),
 		.ENABLE_FAST_MUL(1),
-		.MEM_WORDS(MEM_WORDS)
+		.MEM_WORDS(MEM_WORDS),
+		.PROGADDR_RESET(32'h 0000_0000)
 	) soc (
 		.clk          (clk),
 		.resetn       (resetn),
