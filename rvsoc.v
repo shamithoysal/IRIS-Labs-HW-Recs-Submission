@@ -44,7 +44,7 @@ module rvsoc (
 
     parameter integer MEM_WORDS = 256;
     parameter [31:0] STACKADDR = (4*MEM_WORDS);
-    parameter [31:0] PROGADDR_RESET = 32'h 0010_0000;
+    parameter [31:0] PROGADDR_RESET = 32'h 0000_0000;
     parameter [31:0] PROGADDR_IRQ = 32'h 0000_0000;
 
     reg [31:0] irq;
@@ -211,6 +211,7 @@ module rvsoc (
     wire [7:0] proc_in_data;
     wire proc_in_valid;
     wire input_fifo_empty;
+    wire proc_in_ready;
     assign proc_in_valid = !input_fifo_empty;
 
     async_fifo #(.DWIDTH(8), .DEPTH(16)) input_fifo (
@@ -218,7 +219,7 @@ module rvsoc (
         .w_en(prod_valid), .wdata(prod_pixel), .wfull(input_fifo_full),
         
         .rclk(clk), .rrst_n(resetn), 
-        .r_en(proc_in_valid),
+        .r_en(proc_in_valid && proc_in_ready),
         .rdata(proc_in_data), .rempty(input_fifo_empty)
     );
 
@@ -227,7 +228,7 @@ module rvsoc (
     wire proc_out_valid;
     wire [7:0] cfg_rdata;
     
-    wire cfg_write_en = accel_sel && |mem_wstrb && (mem_addr[7:0] <= 8'h24);
+    wire cfg_write_en = accel_sel && |mem_wstrb && (mem_addr[7:0] < 8'h40);
 
     data_processor #(.DATA_WIDTH(8), .IMG_WIDTH(32)) proc_inst (
         .clk(clk),
@@ -239,12 +240,13 @@ module rvsoc (
         .reg_write_en(cfg_write_en),
         .reg_addr(mem_addr[6:2]), 
         .reg_wdata(mem_wdata[7:0]),
-        .reg_rdata(cfg_rdata)
+        .reg_rdata(cfg_rdata),
+        .in_ready(proc_in_ready)
     );
 
     wire [31:0] result_data;
     wire        result_empty;
-    wire result_pop = accel_sel && !(|mem_wstrb) && (mem_addr[7:0] == 8'h10);
+    wire result_pop = accel_sel && !(|mem_wstrb) && (mem_addr[7:0] == 8'h40);
 
     async_fifo #(.DWIDTH(32), .DEPTH(64)) output_fifo (
         .wclk(clk), .wrst_n(resetn),
@@ -258,11 +260,11 @@ module rvsoc (
     always @(posedge clk) begin
         accel_ready <= accel_sel && !accel_ready; 
         
-        if (mem_addr[7:0] < 8'h10) begin
+        if (mem_addr[7:0] < 8'h40) begin
             accel_rdata <= {24'd0, cfg_rdata};
-        end else if (mem_addr[7:0] == 8'h10) begin
+        end else if (mem_addr[7:0] == 8'h40) begin
             accel_rdata <= result_data;
-        end else if (mem_addr[7:0] == 8'h14) begin
+        end else if (mem_addr[7:0] == 8'h44) begin
             accel_rdata <= {31'd0, !result_empty};
         end else begin
             accel_rdata <= 32'd0;

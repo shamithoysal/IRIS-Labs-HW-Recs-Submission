@@ -7,23 +7,20 @@ module dataproc_tb;
 
     // 2. Reset Generation
     reg [5:0] reset_cnt = 0;
-    wire resetn = &reset_cnt; // Active Low Reset
+    wire resetn = &reset_cnt; 
 
     always @(posedge clk) begin
         if (reset_cnt < 63)
             reset_cnt <= reset_cnt + 1;
     end
 
-    // 3. UART Parameters (Matches your Firmware!)
-    // Firmware Divisor 104 @ 100MHz = ~961,538 Baud
-    // TB Period 53 * 2 * 10ns = 1.06us => ~943,000 Baud
-    // Close enough for simulation!
-    localparam ser_half_period = 53;
+    // 3. UART Parameters (SYNC MODE - DIV 19)
+    localparam ser_half_period = 10;
     event ser_sample;
 
     // 4. Signals
     wire ser_rx;
-    wire ser_tx; // This is the output we watch!
+    wire ser_tx; 
     
     wire flash_csb;
     wire flash_clk;
@@ -33,31 +30,25 @@ module dataproc_tb;
     wire flash_io3;
 
     // =========================================================
-    //  YOUR CUSTOM TB LOGIC STARTS HERE
+    //  OPTIMIZED LOGIC: NO WAVEFORM DUMPING
     // =========================================================
 
-	initial begin
-        $dumpfile("dataproc_tb.vcd");
-        $dumpvars(0, dataproc_tb);
-
-        $display("LOADING FIRMWARE FROM DISK...");
+    initial begin
         
-        // 🚨 ABSOLUTE PATH FORCE-LOAD 🚨
-        // This forces Vivado to read the ACTUAL file you just built.
+        $display("[%t] LOADING FIRMWARE FROM DISK...", $time);
+        
         $readmemh("D:/Data/IRIS HW Labs Recs/IRIS-Labs-HW-Recs-Submission/dataproc_dv/firmware.hex", uut.soc.memory.mem); 
         
-        // Run for 50ms to allow UART to print
-        #50000000; 
-        $display("TIMEOUT: Simulation ran too long!");
+        // Extended runtime for full image processing
+        #200000000; 
+        $display("[%t] TIMEOUT: Simulation finished.", $time);
         $finish;
     end
 
     // =========================================================
-    //  END CUSTOM LOGIC
+    //  INSTANTIATION
     // =========================================================
 
-    // 5. Instantiate the Processor
-    // INCREASED MEMORY TO 4096 WORDS (16KB) TO MATCH LINKER SCRIPT!
     rvsoc_wrapper #(
         .MEM_WORDS(4096) 
     ) uut (
@@ -73,44 +64,36 @@ module dataproc_tb;
         .flash_io3(flash_io3)
     );
 
-    // 6. Flash Model (Not used in RAM mode, but kept for connectivity)
     spiflash spiflash (
-        .csb(flash_csb),
-        .clk(flash_clk),
-        .io0(flash_io0),
-        .io1(flash_io1),
-        .io2(flash_io2),
-        .io3(flash_io3)
+        .csb(flash_csb), .clk(flash_clk), .io0(flash_io0), .io1(flash_io1), .io2(flash_io2), .io3(flash_io3)
     );
 
-    // 7. UART Receiver (The Magic Print Block)
+    // =========================================================
+    //  OPTIMIZED UART RECEIVER (Line Buffered)
+    // =========================================================
+    // 7. Optimized UART Receiver (Instant Print)
     reg [7:0] buffer;
     always begin
-        // Wait for Start Bit (Line goes Low)
         @(negedge ser_tx);
-
-        // Wait Half a bit to get to the middle
         repeat (ser_half_period) @(posedge clk);
         -> ser_sample;
-
-        // Read 8 Data Bits
         repeat (8) begin
             repeat (ser_half_period) @(posedge clk);
             repeat (ser_half_period) @(posedge clk);
-            buffer = {ser_tx, buffer[7:1]}; // Shift in bit
+            buffer = {ser_tx, buffer[7:1]};
             -> ser_sample;
         end
-
-        // Wait for Stop Bit
         repeat (ser_half_period) @(posedge clk);
         repeat (ser_half_period) @(posedge clk);
-        -> ser_sample;
-
-        // Print the Character!
-        if (buffer < 32 || buffer >= 127)
-            $display("Serial data: %d (Hex: %h)", buffer, buffer);
-        else
-            $display("Serial data: '%c'", buffer);
+        
+        // ⚡ INSTANT PRINT: No buffering, no waiting.
+        if (buffer == 13) begin
+            // Ignore Carriage Return
+        end else if (buffer == 10) begin
+            $write("\n"); // Newline
+        end else begin
+            $write("%c", buffer); // Character (digit or minus sign)
+        end
     end
 
 endmodule

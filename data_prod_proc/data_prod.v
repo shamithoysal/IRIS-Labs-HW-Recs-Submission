@@ -14,7 +14,7 @@ module data_producer #(
     reg [$clog2(IMAGE_SIZE):0] pixel_index;
 
     initial begin
-        $readmemh("image.mem", image_mem);
+        $readmemh("D:/Data/IRIS HW Labs Recs/IRIS-Labs-HW-Recs-Submission/image.mem", image_mem);
     end
 
     always @(posedge sensor_clk or negedge rst_n) begin
