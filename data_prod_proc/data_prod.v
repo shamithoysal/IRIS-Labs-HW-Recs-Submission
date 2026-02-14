@@ -15,6 +15,7 @@ module data_producer #(
 
     initial begin
         $readmemh("image.mem", image_mem);
+        $display("Loaded image.mem, first pixel = %h", image_mem[0]);
     end
 
     always @(posedge sensor_clk or negedge rst_n) begin
@@ -26,13 +27,12 @@ module data_producer #(
             if (ready) begin
                 pixel <= image_mem[pixel_index];
                 valid <= 1'b1;
-
                 if (pixel_index < IMAGE_SIZE-1)
                     pixel_index <= pixel_index + 1;
                 else
                     pixel_index <= 0;
             end else begin
-                valid <= (pixel_index == 0) ? 1'b0 : 1'b1;
+                valid <= 1'b0;   // do not assert valid when stalled
             end
         end
     end
