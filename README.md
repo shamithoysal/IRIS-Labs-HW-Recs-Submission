@@ -1,4 +1,6 @@
-# IRIS Labs Hardware Recruitments -  Part A
+# IRIS Labs Hardware Recruitments - 2026
+
+# Part A
 
 1. This can lead to incorrect data transmission because the
 combinational logic responsible for the generation of each bit causes
