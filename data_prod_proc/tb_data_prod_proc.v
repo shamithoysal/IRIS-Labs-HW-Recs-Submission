@@ -46,10 +46,8 @@ module tb_data_prod_proc;
     reg [7:0] cfg_wdata = 0;
     wire [7:0] cfg_rdata;
 
-    // ---------------------------------------------------
-    // Module Instantiations
-    // ---------------------------------------------------
 
+    // Module Instantiations
     async_fifo #(.DWIDTH(8), .DEPTH(16)) async_fifo (
         .wclk(sensor_clk), .wrst_n(sensor_resetn),
         .w_en(valid),          
@@ -62,7 +60,6 @@ module tb_data_prod_proc;
         .rempty(fifo_rempty)
     );
 
-    // Flow Control
     assign ready = !fifo_wfull;       
     assign fifo_ren = !fifo_rempty;   
 
@@ -87,9 +84,7 @@ module tb_data_prod_proc;
         .valid(valid)
     );
 
-    // ---------------------------------------------------
-    // Configuration Tasks (Posedge Implementation)
-    // ---------------------------------------------------
+
     task write_reg(input [4:0] addr, input [7:0] data);
         begin
             @(posedge clk);
@@ -107,22 +102,20 @@ module tb_data_prod_proc;
             cfg_write_en = 0;
             cfg_addr = addr;
             @(posedge clk);
-            #1; // Tiny delay for simulator print stability
+            #1; //  delay for print stability
             $display("[TB] Read Addr %h: Data = %h", addr, cfg_rdata);
         end
     endtask
 
-    // ---------------------------------------------------
+ 
     // Main Simulation Block (All Phases)
-    // ---------------------------------------------------
     initial begin
         wait(resetn);
         repeat(10) @(posedge clk);
         $display("\n[TB] --- Reset Released ---");
 
-        // ==========================================
+
         // PHASE 1: CONVOLUTION (Mode 10)
-        // ==========================================
         $display("\n[TB] === PHASE 1: Testing Convolution (Mode 10) ===");
         write_reg(5'h00, 8'b0000_0010); 
 
@@ -137,31 +130,24 @@ module tb_data_prod_proc;
         // Run long enough to see the box pass through
         #50000; 
 
-        // ==========================================
         // PHASE 2: BYPASS (Mode 00)
-        // ==========================================
         $display("\n[TB] === PHASE 2: Testing Bypass (Mode 00) ===");
         write_reg(5'h00, 8'b0000_0000); // Mode 0
 
         // Run for 20us (enough for a few lines)
         #20000;
 
-        // ==========================================
         // PHASE 3: INVERT (Mode 01)
-        // ==========================================
         $display("\n[TB] === PHASE 3: Testing Invert (Mode 01) ===");
         write_reg(5'h00, 8'b0000_0001); // Mode 1
 
-        // Run for 20us
         #20000;
 
         $display("\n[TB] --- All Tests Complete ---");
         $finish;
     end
 
-    // ---------------------------------------------------
     // LOGGER: Writes Output to File & Console
-    // ---------------------------------------------------
     integer f;
     
     initial begin
