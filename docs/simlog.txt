@@ -1,0 +1,44 @@
+Vivado Simulator v2025.2
+Time resolution is 1 ps
+Loaded image.mem, first pixel = 00
+Time: 655000 | In: 00 | Out: 00000000 (0)
+Time: 665000 | In: 00 | Out: 00000000 (0)
+Time: 675000 | In: 00 | Out: 00000000 (0)
+Time: 685000 | In: 00 | Out: 00000000 (0)
+Time: 695000 | In: 00 | Out: 00000000 (0)
+Time: 705000 | In: 00 | Out: 00000000 (0)
+Time: 715000 | In: 00 | Out: 00000000 (0)
+
+[TB] --- Reset Released ---
+
+[TB] === PHASE 1: Testing Convolution (Mode 10) ===
+[TB] --- Weights Loaded ---
+[TB] Read Addr 08: Data = 04
+Time: 2135000 | In: 00 | Out: fffffff6 (-10)
+Time: 2145000 | In: 00 | Out: fffffff6 (-10)
+Time: 2155000 | In: 00 | Out: fffffff6 (-10)
+Time: 2455000 | In: 00 | Out: ffffffec (-20)
+Time: 2465000 | In: 00 | Out: 00000014 (20)
+Time: 2475000 | In: 00 | Out: 0000000a (10)
+Time: 2485000 | In: 00 | Out: 0000001e (30)
+...
+Time: 50965000 | In: 00 | Out: 00000000 (0)
+
+[TB] === PHASE 2: Testing Bypass (Mode 00) ===
+Time: 53245000 | In: 0a | Out: 0000000a (10)
+Time: 53255000 | In: 0a | Out: 0000000a (10)
+Time: 53265000 | In: 00 | Out: 00000000 (0)
+Time: 53555000 | In: 0a | Out: 0000000a (10)
+Time: 53565000 | In: 0a | Out: 0000000a (10)
+Time: 53575000 | In: 0a | Out: 0000000a (10)
+
+[TB] === PHASE 3: Testing Invert (Mode 01) ===
+Time: 72275000 | In: 00 | Out: 000000ff (255)
+Time: 72285000 | In: 00 | Out: 000000ff (255)
+Time: 73695000 | In: 0a | Out: 000000f5 (245)
+Time: 73705000 | In: 0a | Out: 000000f5 (245)
+Time: 73715000 | In: 0a | Out: 000000f5 (245)
+Time: 83925000 | In: 0a | Out: 000000f5 (245)
+
+[TB] --- All Tests Complete ---
+$finish called at time : 90975 ns

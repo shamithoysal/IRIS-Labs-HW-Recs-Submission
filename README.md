@@ -132,7 +132,7 @@ By implementing a systolic array, the design dramatically optimizes resource usa
 
 ## 4. Verification
 
-The `tb_data_prod_proc.v` testbench performs a combined system integration test.
+The `tb_data_prod_proc.v` testbench performs a combined system integration test. Complete log is available at `/docs/simlog.txt`.
 
 ### Parameters
 
@@ -146,8 +146,7 @@ The processor was configured with a standard **Laplacian Edge Detection** kernel
 
 **Kernel Configuration:**
 
-[](data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="0.667em" height="3.600em" viewBox="0 0 667 3600"><path d="M403 1759 V84 H666 V0 H319 V1759 v0 v1759 h347 v-84
-H403z M403 1759 V0 H319 V1759 v0 v1759 h84z"></path></svg>)
+
 
 ```
    0   -1    0
@@ -155,8 +154,6 @@ H403z M403 1759 V0 H319 V1759 v0 v1759 h84z"></path></svg>)
    0   -1    0 
 ```
 
-[](data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="0.667em" height="3.600em" viewBox="0 0 667 3600"><path d="M347 1759 V0 H0 V84 H263 V1759 v0 v1759 H0 v84 H347z
-M347 1759 V0 H263 V1759 v0 v1759 h84z"></path></svg>)
 
 Simulation Log
 
@@ -187,11 +184,11 @@ Time: 53565000 | In: 0a | Out: 0000000a (10)
 Time: 53575000 | In: 0a | Out: 0000000a (10)
 ```
 
-In this mode, the systolic array is bypassed. The verification confirmed transparent data transfer.
+In this mode, the systolic array is bypassed.
 
 ### Phase 3: Invert (Mode 01)
 
-This mode tests the arithmetic logic unit (ALU) for simple bitwise operations (Output=255−Input).
+This mode tests the arithmetic logic unit (ALU) for simple bitwise operations (Output= 255-Input).
 
 Simulation Log
 
@@ -216,7 +213,7 @@ For input `00`, output is `ff` (255). For input `0a`, output is `f5` (245). No o
 
 The verified data‑processing block from Part B is integrated into the provided RISC‑V SoC as a memory‑mapped peripheral. The accelerator is accessed via the `iomem` bus using a single‑cycle interface. The datapath includes asynchronous FIFOs at both the input and output of the processing block. This buffering enables the modules to operate at different clock rates in future implementations, while for initial verification, all components operate on the same 100 MHz clock domain.
 
-## 2**. Complete Memory Map**
+## 2. Complete Memory Map
 
 | Address Range | Region | Description | Size |
 | --- | --- | --- | --- |
@@ -304,7 +301,7 @@ A Makefile automates the build process, invoking the GCC RISC‑V toolchain to c
     - Toggles the GPIO bit 0.
 6. After five results, prints `"\nTest complete.\n"` and ends in an infinite loop.
 
-The simulation log shows that the UART outputs the expected characters and that the first result (`0`) and matches the first pixel in `image.mem` (a ramp starting at 0).
+The simulation log shows that the UART outputs the expected characters and that the first result (`0`) matches the first pixel in `image.mem` (a ramp starting at 0).
 
 ```
 Loaded image.mem, first pixel = 00
@@ -447,4 +444,4 @@ result register, confirming that the convolution datapath is functional.
 - `kernel_reg[0]` through `kernel_reg[8]` store the nine 8‑bit kernel coefficients.
 - `flat_kernel` = `00000000ff00ff04ff` – a 72‑bit concatenation of the nine coefficients (order may be implementation‑specific).
 
-Again, similar to the first program, this is not a comprehensive result. Although the simulation duration limited the UART output to the first pixel, the internal hardware state confirms successful configuration. The waveform captures (Figure 2) show the mode_reg correctly transitioning to 0x02  and the flat_kernel register reflecting the loaded edge-detection coefficients. This proves that the Memory-Mapped Write Interface is correctly decoding addresses and updating the accelerator's internal state in a single clock cycle.
+Again, similar to the first program, this is not a comprehensive result. Although the simulation duration limited the UART output to the first pixel, the internal hardware state confirms successful configuration. The waveform captures (Figure 2) show the mode_reg correctly transitioning to 0x02 and the flat_kernel register reflecting the loaded edge-detection coefficients. This proves that the Memory-Mapped Write Interface is correctly decoding addresses and updating the accelerator's internal state in a single clock cycle.
