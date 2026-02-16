@@ -263,17 +263,12 @@ The core communicates with memory‑mapped peripherals via:
 The accelerator consists of four main blocks:
 
 | Block | Description |
-| --- | --- |
+| :--- | :--- |
 | **Data Producer** | Generates 8‑bit pixel stream from `image.mem`. Controlled by input FIFO full flag via `ready` signal. |
-| **Input FIFO** | 8‑bit
- asynchronous FIFO (depth 16) with configurable full/empty margins. 
-Buffers pixels from producer to processor. Both write and read clocks 
-are tied to the system clock for initial validation. |
+| **Input FIFO** | 8‑bit asynchronous FIFO (depth 16) with configurable full/empty margins. Buffers pixels from producer to processor. Both write and read clocks are tied to the system clock for initial validation. |
 | **Data Processor** | Configurable via memory‑mapped registers. Supports bypass, invert, and 3×3 convolution modes. Features `in_ready`/`out_ready` handshake for flow control. |
-| **Output FIFO** | 32‑bit
- asynchronous FIFO (depth 64) with configurable margins. Stores 
-processed results for CPU access. Read is combinational, allowing 
-single‑cycle reads via the `iomem` bus. |
+| **Output FIFO** | 32‑bit asynchronous FIFO (depth 64) with configurable margins. Stores processed results for CPU access. Read is combinational, allowing single‑cycle reads via the `iomem` bus. |
+
 
 ## 5. Firmware and Startup
 
