@@ -50,7 +50,7 @@ module tb_data_prod_proc;
     // Module Instantiations
     async_fifo #(.DWIDTH(8), .DEPTH(16)) async_fifo (
         .wclk(sensor_clk), .wrst_n(sensor_resetn),
-        .w_en(valid),          
+        .w_en(valid),           
         .wdata(pixel),
         .wfull(fifo_wfull),     
 
@@ -102,7 +102,7 @@ module tb_data_prod_proc;
             cfg_write_en = 0;
             cfg_addr = addr;
             @(posedge clk);
-            #1; //  delay for print stability
+            #1; // delay for print stability
             $display("[TB] Read Addr %h: Data = %h", addr, cfg_rdata);
         end
     endtask
@@ -127,14 +127,14 @@ module tb_data_prod_proc;
         $display("[TB] --- Weights Loaded ---");
         read_reg(5'h08); // Verify Center
 
-        // Run long enough to see the box pass through
+        
         #50000; 
 
         // PHASE 2: BYPASS (Mode 00)
         $display("\n[TB] === PHASE 2: Testing Bypass (Mode 00) ===");
         write_reg(5'h00, 8'b0000_0000); // Mode 0
 
-        // Run for 20us (enough for a few lines)
+        
         #20000;
 
         // PHASE 3: INVERT (Mode 01)
@@ -147,24 +147,11 @@ module tb_data_prod_proc;
         $finish;
     end
 
-    // LOGGER: Writes Output to File & Console
-    integer f;
-    
-    initial begin
-        f = $fopen("simulation_log.txt", "w"); // Open file
-        $fwrite(f, "Time_ns, Valid, Input_Pixel_Hex, Output_Pixel_Hex, Output_Pixel_Dec\n"); // Header
-    end
-
+    // Write to Console
     always @(posedge clk) begin
-        // Only log when we have a valid output
         if (proc_out_valid) begin
-            // Write to Console
             $display("Time: %0t | In: %h | Out: %h (%0d)", 
                      $time, fifo_rdata, proc_out_pixel, proc_out_pixel);
-            
-            // Write to File
-            $fwrite(f, "%0t, 1, %h, %h, %0d\n", 
-                    $time, fifo_rdata, proc_out_pixel, proc_out_pixel);
         end
     end
 endmodule
