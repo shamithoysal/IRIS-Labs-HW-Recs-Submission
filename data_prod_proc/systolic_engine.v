@@ -68,18 +68,12 @@ module systolic_engine #(
             final_sum <= 0;
             valid_pipe <= 0;
         end else begin
-            // Sum current column outputs directly!
+
             final_sum <= r2_c0_s + r2_c1_s + r2_c2_s;
-            
             valid_pipe <= {valid_pipe[7:0], in_valid}; 
-            
-            // Debug Spy
-            if (r2_c1_s == 40) 
-                 $display("ENGINE SPY: Center hit! Summing: %d + %d + %d = %d", 
-                          r2_c0_s, r2_c1_s, r2_c2_s, r2_c0_s + r2_c1_s + r2_c2_s);
         end
     end
 
     assign out_pixel = final_sum;
-    assign out_valid = valid_pipe[7]; // You might need to tune this delay index to match the new latency!
+    assign out_valid = valid_pipe[7]; 
 endmodule

@@ -21,6 +21,7 @@ module data_processor #(
     wire [31:0] conv_out;
     wire conv_valid;
 
+    // Initialize to identity kernel
     always @(posedge clk or negedge rstn) begin
         if (!rstn) begin
             mode_reg <= 0;
@@ -43,6 +44,7 @@ module data_processor #(
         end
     end
 
+    // Configure Kernels
     always @(*) begin
         case (reg_addr)
             5'h00: reg_rdata = {6'b0, mode_reg};
@@ -60,6 +62,7 @@ module data_processor #(
         endcase
     end
 
+    // Pack into a single bus
     assign flat_kernel = {
         kernel_reg[8], kernel_reg[7], kernel_reg[6],
         kernel_reg[5], kernel_reg[4], kernel_reg[3],
@@ -77,6 +80,7 @@ module data_processor #(
 
     assign in_ready = out_ready;
 
+    // Set processing mode
     always @(*) begin
         case (mode_reg)
             2'b00: begin

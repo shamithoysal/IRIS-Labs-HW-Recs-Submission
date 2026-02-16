@@ -29,7 +29,7 @@ _start:
     blt a0, a1, 3b
 4:
 
-    # Call main (the C program)
+    # Call main
     call main
 
     # If main returns, loop forever

@@ -180,10 +180,7 @@ module rvsoc (
 		.reg_dat_wait(simpleuart_reg_dat_wait)
 	);
 
-	// Instantiate your data-processing-producing combined module here
-
-
-	//----------------------------------------------------------------
+	// Note: The accelerator is instantiated in rvsoc_wrapper.v
 
 	always @(posedge clk)
 		ram_ready <= mem_valid && !mem_ready && mem_addr < 4*MEM_WORDS;

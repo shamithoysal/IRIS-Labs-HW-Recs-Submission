@@ -1,8 +1,8 @@
 module async_fifo #(
     parameter DWIDTH = 8,
     parameter DEPTH  = 16,
-    parameter FULL_OFFSET = 5,   // Stop when only this many slots left
-    parameter EMPTY_OFFSET = 5    // Stop when only this many entries left
+    parameter FULL_OFFSET = 5,  
+    parameter EMPTY_OFFSET = 5   
 )(
     input  wclk,
     input  wrst_n,
@@ -18,7 +18,7 @@ module async_fifo #(
     localparam AWIDTH = $clog2(DEPTH);
     reg [DWIDTH-1:0] mem [0:DEPTH-1];
 
-    // Binary pointers (extra bit for wrap)
+    // Binary pointers
     reg [AWIDTH:0] wptr_bin, rptr_bin;
     // Gray code pointers
     reg [AWIDTH:0] wptr_gray, rptr_gray;
@@ -27,7 +27,7 @@ module async_fifo #(
     reg [AWIDTH:0] wptr_gray_sync1, wptr_gray_sync2;
     reg [AWIDTH:0] rptr_gray_sync1, rptr_gray_sync2;
 
-    // Gray to binary conversion (combinational)
+    // Gray to binary conversion
     function [AWIDTH:0] gray2bin;
         input [AWIDTH:0] gray;
         integer i;
@@ -83,25 +83,18 @@ module async_fifo #(
         end
     end
 
-    // Combinational read data
+    // Read data
     assign rdata = mem[rptr_bin[AWIDTH-1:0]];
 
-    // -----------------------------------------------------------------
-    // Full detection with margin
-    // Convert synchronized read pointer (gray) to binary
+
+    // Full Logic
     wire [AWIDTH:0] rptr_bin_sync = gray2bin(rptr_gray_sync2);
-    // Distance from write pointer to synchronized read pointer (modulo 2*DEPTH)
     wire [AWIDTH:0] dist = wptr_bin - rptr_bin_sync;
-    // Full when distance >= DEPTH - FULL_OFFSET
     assign wfull = (dist >= (DEPTH - FULL_OFFSET));
 
-    // -----------------------------------------------------------------
-    // Empty detection with margin
-    // Convert synchronized write pointer (gray) to binary
+    // Empty Logic
     wire [AWIDTH:0] wptr_bin_sync = gray2bin(wptr_gray_sync2);
-    // Distance from read pointer to synchronized write pointer
     wire [AWIDTH:0] dist_r = wptr_bin_sync - rptr_bin;
-    // Empty when distance <= EMPTY_OFFSET
     assign rempty = (dist_r <= EMPTY_OFFSET);
 
 endmodule

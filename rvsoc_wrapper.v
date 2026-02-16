@@ -52,10 +52,7 @@ module rvsoc_wrapper (
         end
     end
 
-    // -----------------------------------------------------------------
     // ACCELERATOR at 0x0400_0000
-    // -----------------------------------------------------------------
-    // Declare all accelerator internal wires
     wire [7:0] prod_pixel;
     wire prod_valid;
     wire input_fifo_full;
@@ -75,7 +72,6 @@ module rvsoc_wrapper (
     wire [31:0] result_data;
     wire        result_empty;
 
-    // Decoder wires
     wire accel_sel      = iomem_valid && (iomem_addr[31:24] == 8'h04);
     wire accel_write_en = accel_sel && |iomem_wstrb && (iomem_addr[7:0] < 8'h40);
     wire [4:0] accel_addr = iomem_addr[6:2];
@@ -90,11 +86,9 @@ module rvsoc_wrapper (
         32'd0;
 
     wire gpio_sel = iomem_valid && (iomem_addr[31:24] == 8'h03);
-    wire accel_ready_comb = accel_sel;
 
-    // -----------------------------------------------------------------
+
     // Instantiate modules
-    // -----------------------------------------------------------------
     data_producer prod_inst (
         .sensor_clk(clk),
         .rst_n(resetn),
@@ -103,12 +97,21 @@ module rvsoc_wrapper (
         .valid(prod_valid)
     );
 
-    sync_fifo #(.DWIDTH(8), .DEPTH(16)) input_fifo (
-        .clk    (clk),
-        .rst_n  (resetn),
+    // Input FIFO: 8-bit, depth 16, using async FIFO with margins
+    async_fifo #(
+        .DWIDTH(8),
+        .DEPTH(16),
+        .FULL_OFFSET(5),   // margin to prevent overflow due to synchronizer delay
+        .EMPTY_OFFSET(5)   // margin to prevent underflow
+    ) input_fifo (
+        .wclk   (clk),
+        .wrst_n (resetn),
         .w_en   (prod_valid),
         .wdata  (prod_pixel),
         .wfull  (input_fifo_full),
+
+        .rclk   (clk),
+        .rrst_n (resetn),
         .r_en   (proc_in_valid && proc_in_ready),
         .rdata  (proc_in_data),
         .rempty (input_fifo_empty)
@@ -131,12 +134,21 @@ module rvsoc_wrapper (
         .in_ready     (proc_in_ready)
     );
 
-    sync_fifo #(.DWIDTH(32), .DEPTH(64)) output_fifo (
-        .clk    (clk),
-        .rst_n  (resetn),
+    // Output FIFO: 32-bit, depth 64, using async FIFO with margins
+    async_fifo #(
+        .DWIDTH(32),
+        .DEPTH(64),
+        .FULL_OFFSET(5),
+        .EMPTY_OFFSET(5)
+    ) output_fifo (
+        .wclk   (clk),
+        .wrst_n (resetn),
         .w_en   (proc_out_valid),
         .wdata  (proc_out_pixel),
         .wfull  (output_fifo_full),
+
+        .rclk   (clk),
+        .rrst_n (resetn),
         .r_en   (result_pop),
         .rdata  (result_data),
         .rempty (result_empty)
@@ -144,15 +156,13 @@ module rvsoc_wrapper (
 
     assign out_ready = !output_fifo_full;
 
-    // -----------------------------------------------------------------
-    // iomem response mux (combinatorial)
-    // -----------------------------------------------------------------
-    assign iomem_ready = gpio_sel || accel_ready_comb;
+
+    // iomem response mux
+    assign iomem_ready = gpio_sel || accel_sel;
     assign iomem_rdata = gpio_sel ? gpio : (accel_sel ? accel_rdata : 32'd0);
 
-    // -----------------------------------------------------------------
+
     // RISC‑V core instantiation
-    // -----------------------------------------------------------------
     rvsoc #(
         .BARREL_SHIFTER(0),
         .ENABLE_MUL(0),
