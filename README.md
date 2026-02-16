@@ -113,7 +113,7 @@ Contains the configuration registers and a systolic array for convolution operat
 
 ### **Implementation**
 
-To handle the streaming data, we need to be able to see a pixel's neighbors without stalling the pipeline. This was achieved using 2 Line Buffer that caches the previous two pixel lines. This creates three vertical data taps: the live stream (`tap 2`) and the two delayed rows (`tap 1`, `tap 0`). From there, pipelined shift registers handle horizontal alignment, rebuilding a complete 3x3 pixel window every single clock cycle. The soul of the systolic array is the Multiply and Accumulate unit which are configured in a 3x3 arrangement. Each pixel is handled by a single MAC Unit. This grid of nine pixels is then multiplied in parallel with the configurable weights and accumulated into the `final_sum`, delivering high throughput with minimal latency.
+To handle the streaming data, we need to be able to see a pixel's neighbors without stalling the pipeline. This was achieved using 2 Line Buffers that cache the previous two pixel lines. This creates three vertical data taps: the live stream (`tap 0`) and the two delayed rows (`tap 1`, `tap 2`). From there, pipelined shift registers handle horizontal alignment, rebuilding a complete 3x3 pixel window every single clock cycle. The soul of the systolic array is the Multiply and Accumulate unit. 9 MAC units are configured in a 3x3 arrangement. Each pixel is handled by a single MAC Unit. This grid of 9 pixels is then multiplied in parallel with the configurable weights and accumulated into the `final_sum`, delivering high throughput with minimal latency.
 
 ### **Motivation**
 
@@ -431,7 +431,6 @@ result register, confirming that the convolution datapath is functional.
 - `iomem_valid` = 1
 - `iomem_wstrb` = `0xF` (all byte enables active, indicating a full 32‑bit write)
 - `iomem_wdata` = `0x00000004` (value written to the register)
-- `iomem_ready` is asserted (not shown in this capture, but the transaction completes in a single cycle)
 
 ![image.png](/docs/image%208.png)
 
@@ -439,6 +438,6 @@ result register, confirming that the convolution datapath is functional.
 
 - `mode_reg` = `2`, indicating the accelerator is set to **convolution mode**.
 - `kernel_reg[0]` through `kernel_reg[8]` store the nine 8‑bit kernel coefficients.
-- `flat_kernel` = `00000000ff00ff04ff` – a 72‑bit concatenation of the nine coefficients (order may be implementation‑specific).
+- `flat_kernel` = `00000000ff00ff04ff` – a 72‑bit concatenation of the nine coefficients 
 
 Again, similar to the first program, this is not a comprehensive result. Although the simulation duration limited the UART output to the first pixel, the internal hardware state confirms successful configuration. The waveform captures (Figure 2) show the mode_reg correctly transitioning to 0x02 and the flat_kernel register reflecting the loaded edge-detection coefficients. This proves that the Memory-Mapped Write Interface is correctly decoding addresses and updating the accelerator's internal state in a single clock cycle.
